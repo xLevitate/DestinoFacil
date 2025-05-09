@@ -1,32 +1,35 @@
 const express = require('express');
-const router = express.Router();
-const Destination = require('../models/Destination');
-const auth = require('../middleware/auth');
-const User = require('../models/User');
+const roteador = express.Router();
+const Destino = require('../models/Destination');
+const autenticacao = require('../middleware/auth');
+const Usuario = require('../models/User');
 
-router.get('/', async (req, res) => {
+// pega todos os destinos
+roteador.get('/', async (req, res) => {
   try {
-    const destinations = await Destination.find().sort({ dataCriacao: -1 });
-    res.json(destinations);
-  } catch (err) {
-    console.error(err.message);
+    const destinos = await Destino.find().sort({ dataCriacao: -1 });
+    res.json(destinos);
+  } catch (erro) {
+    console.error(erro.message);
     res.status(500).send('Erro no servidor');
   }
 });
 
-router.get('/:id', async (req, res) => {
+// pega um destino pelo id
+roteador.get('/:id', async (req, res) => {
   try {
-    const destination = await Destination.findById(req.params.id);
+    const destino = await Destino.findById(req.params.id);
     
-    if (!destination) {
+    // verifica se o destino existe
+    if (!destino) {
       return res.status(404).json({ msg: 'Destino não encontrado' });
     }
     
-    res.json(destination);
-  } catch (err) {
-    console.error(err.message);
+    res.json(destino);
+  } catch (erro) {
+    console.error(erro.message);
     
-    if (err.kind === 'ObjectId') {
+    if (erro.kind === 'ObjectId') {
       return res.status(404).json({ msg: 'Destino não encontrado' });
     }
     
@@ -34,48 +37,53 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/favorite/:id', auth, async (req, res) => {
+// adiciona um destino aos favoritos
+roteador.post('/favorite/:id', autenticacao, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const usuario = await Usuario.findById(req.usuario.id);
     
-    if (user.destinosFavoritos.includes(req.params.id)) {
+    // verifica se ja esta nos favoritos
+    if (usuario.destinosFavoritos.includes(req.params.id)) {
       return res.status(400).json({ msg: 'Destino já está nos favoritos' });
     }
     
-    user.destinosFavoritos.push(req.params.id);
-    await user.save();
+    // adiciona aos favoritos
+    usuario.destinosFavoritos.push(req.params.id);
+    await usuario.save();
     
-    res.json(user.destinosFavoritos);
-  } catch (err) {
-    console.error(err.message);
+    res.json(usuario.destinosFavoritos);
+  } catch (erro) {
+    console.error(erro.message);
     res.status(500).send('Erro no servidor');
   }
 });
 
-router.post('/search', async (req, res) => {
+// busca destinos com filtros
+roteador.post('/search', async (req, res) => {
   try {
     const { categorias, localizacao, precoMaximo } = req.body;
     
-    const query = {};
+    const consulta = {};
     
+    // adiciona filtros na consulta
     if (categorias && categorias.length > 0) {
-      query.categorias = { $in: categorias };
+      consulta.categorias = { $in: categorias };
     }
     
     if (localizacao) {
-      query.localizacao = new RegExp(localizacao, 'i');
+      consulta.localizacao = new RegExp(localizacao, 'i');
     }
     
     if (precoMaximo) {
-      query.precoEstimado = { $lte: precoMaximo };
+      consulta.precoEstimado = { $lte: precoMaximo };
     }
     
-    const destinations = await Destination.find(query).sort({ dataCriacao: -1 });
-    res.json(destinations);
-  } catch (err) {
-    console.error(err.message);
+    const destinos = await Destino.find(consulta).sort({ dataCriacao: -1 });
+    res.json(destinos);
+  } catch (erro) {
+    console.error(erro.message);
     res.status(500).send('Erro no servidor');
   }
 });
 
-module.exports = router;
+module.exports = roteador;

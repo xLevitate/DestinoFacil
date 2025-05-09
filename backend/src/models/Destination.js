@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-const DestinationSchema = new mongoose.Schema({
+// esquema do destino turistico
+const EsquemaDestino = new mongoose.Schema({
   nome: {
     type: String,
     required: true
@@ -36,4 +37,5 @@ const DestinationSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Destination', DestinationSchema);
+// exportando o modelo
+module.exports = mongoose.model('Destination', EsquemaDestino);

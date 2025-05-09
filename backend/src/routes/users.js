@@ -1,91 +1,100 @@
 const express = require('express');
-const router = express.Router();
+const roteador = express.Router();
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const Usuario = require('../models/User');
 
-const auth = require('../middleware/auth');
+const autenticacao = require('../middleware/auth');
 
-router.post('/register', async (req, res) => {
+// rota para registrar novo usuario
+roteador.post('/register', async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
     
-    let user = await User.findOne({ email });
-    if (user) {
+    // verifica se o usuario ja existe
+    let usuario = await Usuario.findOne({ email });
+    if (usuario) {
       return res.status(400).json({ msg: 'Usuário já existe' });
     }
     
-    user = new User({
+    // cria novo usuario
+    usuario = new Usuario({
       nome,
       email,
       senha
     });
     
-    await user.save();
+    await usuario.save();
     
-    const payload = {
-      user: {
-        id: user.id
+    // cria o token jwt
+    const carga = {
+      usuario: {
+        id: usuario.id
       }
     };
     
     jwt.sign(
-      payload,
+      carga,
       process.env.JWT_SECRET,
       { expiresIn: '5d' },
-      (err, token) => {
-        if (err) throw err;
+      (erro, token) => {
+        if (erro) throw erro;
         res.json({ token });
       }
     );
-  } catch (err) {
-    console.error(err.message);
+  } catch (erro) {
+    console.error(erro.message);
     res.status(500).send('Erro no servidor');
   }
 });
 
-router.post('/login', async (req, res) => {
+// rota para login
+roteador.post('/login', async (req, res) => {
   try {
     const { email, senha } = req.body;
     
-    let user = await User.findOne({ email });
-    if (!user) {
+    // busca usuario pelo email
+    let usuario = await Usuario.findOne({ email });
+    if (!usuario) {
       return res.status(400).json({ msg: 'Credenciais inválidas' });
     }
     
-    const isMatch = await user.compareSenha(senha);
-    if (!isMatch) {
+    // verifica a senha
+    const senhaCorreta = await usuario.compareSenha(senha);
+    if (!senhaCorreta) {
       return res.status(400).json({ msg: 'Credenciais inválidas' });
     }
     
-    const payload = {
-      user: {
-        id: user.id
+    // cria o token jwt
+    const carga = {
+      usuario: {
+        id: usuario.id
       }
     };
     
     jwt.sign(
-      payload,
+      carga,
       process.env.JWT_SECRET,
       { expiresIn: '5d' },
-      (err, token) => {
-        if (err) throw err;
+      (erro, token) => {
+        if (erro) throw erro;
         res.json({ token });
       }
     );
-  } catch (err) {
-    console.error(err.message);
+  } catch (erro) {
+    console.error(erro.message);
     res.status(500).send('Erro no servidor');
   }
 });
 
-router.get('/me', auth, async (req, res) => {
+// rota para obter dados do usuario logado
+roteador.get('/me', autenticacao, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-senha');
-    res.json(user);
-  } catch (err) {
-    console.error(err.message);
+    const usuario = await Usuario.findById(req.usuario.id).select('-senha');
+    res.json(usuario);
+  } catch (erro) {
+    console.error(erro.message);
     res.status(500).send('Erro no servidor');
   }
 });
 
-module.exports = router;
+module.exports = roteador;
