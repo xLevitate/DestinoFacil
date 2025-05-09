@@ -24,7 +24,6 @@ export default function Home() {
 
   return (
     <MainLayout>
-      {/* Hero section */}
       <div className="relative overflow-hidden bg-gray-50 dark:bg-gray-900 py-16 md:py-24">
         <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
@@ -63,13 +62,10 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/* End Hero */}
 
-      {/* Cards */}
       <div className="max-w-[85rem] px-4 py-12 sm:px-6 lg:px-8 lg:py-16 mx-auto">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">Por que escolher o DestinoFacil?</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Card */}
           <div className="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-slate-900 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="h-52 flex flex-col justify-center items-center bg-blue-600 rounded-t-xl">
               <svg className="flex-shrink-0 w-20 h-20 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -91,9 +87,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          {/* End Card */}
 
-          {/* Card */}
           <div className="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-slate-900 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="h-52 flex flex-col justify-center items-center bg-rose-500 rounded-t-xl">
               <svg className="flex-shrink-0 w-20 h-20 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -117,9 +111,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          {/* End Card */}
 
-          {/* Card */}
           <div className="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-slate-900 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="h-52 flex flex-col justify-center items-center bg-amber-500 rounded-t-xl">
               <svg className="flex-shrink-0 w-20 h-20 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -142,12 +134,9 @@ export default function Home() {
               </a>
             </div>
           </div>
-          {/* End Card */}
         </div>
       </div>
-      {/* End Cards */}
       
-      {/* Destinos em destaque */}
       <div className="max-w-[85rem] px-4 py-8 sm:px-6 lg:px-8 mx-auto">
         <div className="mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Destinos em destaque</h2>
@@ -178,13 +167,10 @@ export default function Home() {
           )}
         </div>
       </div>
-      {/* End Destinos em destaque */}
 
-      {/* Testimonials */}
       <div className="max-w-[85rem] px-4 py-12 sm:px-6 lg:px-8 lg:py-16 mx-auto">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">O que nossos usuários dizem</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Testimonial */}
           <div className="flex flex-col bg-white border border-gray-200 shadow-sm rounded-xl p-4 md:p-6 dark:bg-slate-900 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="flex items-center gap-x-4">
               <img className="rounded-full w-12 h-12" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="Foto de perfil" />
@@ -202,9 +188,7 @@ export default function Home() {
               &quot;O DestinoFacil me ajudou a encontrar o destino perfeito para minhas férias. As recomendações foram precisas e o processo de busca foi super simples. Recomendo a todos!&quot;
             </p>
           </div>
-          {/* End Testimonial */}
 
-          {/* Testimonial */}
           <div className="flex flex-col bg-white border border-gray-200 shadow-sm rounded-xl p-4 md:p-6 dark:bg-slate-900 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="flex items-center gap-x-4">
               <img className="rounded-full w-12 h-12" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="Foto de perfil" />
@@ -222,9 +206,7 @@ export default function Home() {
               &quot;Viajei para Gramado usando as recomendações do site e foi uma experiência incrível! As informações detalhadas sobre cada lugar me ajudaram a planejar o roteiro perfeito.&quot;
             </p>
           </div>
-          {/* End Testimonial */}
 
-          {/* Testimonial */}
           <div className="flex flex-col bg-white border border-gray-200 shadow-sm rounded-xl p-4 md:p-6 dark:bg-slate-900 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="flex items-center gap-x-4">
               <img className="rounded-full w-12 h-12" src="https://images.unsplash.com/photo-1557862921-37829c790f19?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="Foto de perfil" />
@@ -242,10 +224,10 @@ export default function Home() {
               &quot;Descobri destinos incríveis que eu nunca havia considerado antes. Os recursos de filtragem por interesse são ótimos e me ajudaram a encontrar exatamente o que eu estava procurando.&quot;
             </p>
           </div>
-          {/* End Testimonial */}
+          {}
         </div>
       </div>
-      {/* End Testimonials */}
+      {}
     </MainLayout>
   );
 }

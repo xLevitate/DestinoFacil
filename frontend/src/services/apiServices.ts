@@ -245,10 +245,6 @@ export const cityInfoServices = {
   }
 };
 
-/**
- * Normalize a city name to improve search success rate
- * Removes terms like "Região Metropolitana de" and other prefixes
- */
 const normalizeCityName = (cityName: string): string => {
   return cityName
     .replace(/Região Metropolitana d[aeo]/i, '')
