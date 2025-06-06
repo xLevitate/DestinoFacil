@@ -1,0 +1,207 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Prompt para Implementação de Features - Aplicação de Destinos de Viagem
+
+## Contexto do Projeto
+Agora que o código foi simplificado, preciso implementar as funcionalidades essenciais de forma **inteligente e eficiente**, utilizando serviços prontos como Supabase para reduzir o trabalho de desenvolvimento. O foco é criar uma aplicação **moderna, profissional e funcional** com apenas 4 páginas principais.
+
+## Objetivos da Implementação
+
+### 1. ARQUITETURA INTELIGENTE
+- **Use Supabase** para autenticação (não faça do zero)
+- **Aproveite APIs gratuitas** para dados reais
+- **Implemente cache inteligente** para reduzir chamadas de API
+- **Mantenha a simplicidade** da arquitetura atual
+- **Use soluções prontas** sempre que possível
+
+### 2. DESIGN MODERNO E PROFISSIONAL
+- **Tema escuro** como padrão
+- **Shadcn/UI** como biblioteca de componentes obrigatória
+- **Design responsivo** e moderno
+- **UX intuitiva** e profissional
+- **Animações sutis** e transições suaves
+- **Tipografia clara** e hierarquia visual bem definida
+
+## Páginas a Implementar (4 páginas total)
+
+### 1. 🏠 Landing Page Profissional
+**Objetivo:** Apresentar a aplicação de forma profissional e atrativa
+
+**Componentes necessários:**
+- **Hero Section** - Título impactante, subtítulo explicativo, CTA para começar
+- **Seção de Features** - 3-4 principais funcionalidades com ícones
+- **Seção "Como Funciona"** - Processo em 3 passos simples
+- **Seção de Destinos Populares** - Preview de 3-4 destinos com cards
+- **Footer** - Links úteis, informações de contato
+
+**Requisitos técnicos:**
+- Use **Shadcn/UI** para todos os componentes
+- **Tema escuro** elegante
+- **Animações on-scroll** sutis
+- **Totalmente responsivo**
+- **Performance otimizada**
+
+### 2. 🔐 Páginas de Autenticação (Login/Signup)
+**Objetivo:** Autenticação simples e segura via Supabase
+
+**Componentes necessários:**
+- **Formulário de Login** - Email, senha, "Lembrar de mim", "Esqueci senha"
+- **Formulário de Signup** - Nome, email, senha, confirmação
+- **Integração Supabase** - Configuração completa de auth
+- **Validação de formulários** - Mensagens de erro claras
+- **Redirecionamento** - Para destinations após login
+
+**Requisitos técnicos:**
+- **Supabase Auth** totalmente configurado
+- **Validação client-side** com feedback visual
+- **Estados de loading** durante autenticação
+- **Tratamento de erros** user-friendly
+- **Persistência de sessão**
+
+### 3. 🌍 Página de Destinos (Página Principal)
+**Objetivo:** Exibir destinos com informações completas e úteis
+
+**Componentes necessários:**
+- **Barra de filtros** - Por região, preço, clima, etc.
+- **Grid de destinos** - Cards com todas as informações
+- **Sistema de busca** - Por nome ou características
+- **Paginação ou scroll infinito**
+- **Sidebar com filtros avançados**
+
+**Informações por destino:**
+- **Nome e localização** (país/região)
+- **Imagem principal** (cached para performance)
+- **Descrição atrativa** (2-3 linhas)
+- **População** da cidade/região
+- **Indicador de preço** (💰 💰💰 💰💰💰 sistema visual)
+- **Clima atual** e temperatura
+- **Melhor época para visitar**
+- **Pontos turísticos principais** (3-4 itens)
+
+**Requisitos técnicos:**
+- **Cache de imagens** para evitar recarregamentos
+- **Cache de dados** dos destinos (localStorage/sessionStorage)
+- **APIs gratuitas** para dados reais:
+  - REST Countries API (informações de países)
+  - OpenWeatherMap API (clima)
+  - Pexels API (imagens de qualidade)
+- **Loading states** durante carregamento
+- **Filtros funcionais** e responsivos
+
+## Especificações Técnicas
+
+### Stack Recomendada
+- **Frontend:** React/Next.js (mantém simplicidade)
+- **UI Library:** Shadcn/UI (obrigatório)
+- **Autenticação:** Supabase Auth
+- **Styling:** Tailwind CSS (integrado com Shadcn)
+- **Ícones:** Lucide React (integrado com Shadcn)
+
+### APIs Gratuitas a Utilizar
+- **REST Countries API** - Dados de países (população, região, etc.)
+- **OpenWeatherMap API** - Clima atual e previsões
+- **Pexels API** - Imagens de alta qualidade dos destinos
+- **Opcional:** WorldBank API para dados econômicos
+
+### Sistema de Cache
+- **Imagens:** Cache no localStorage com expiração
+- **Dados de destinos:** Cache com refresh diário
+- **Dados de clima:** Cache com refresh de 6 horas
+- **Otimização:** Lazy loading para imagens
+
+### Design System (Tema Escuro)
+- **Cores primárias:** Tons de azul/verde para viagem
+- **Background:** Gradientes escuros sutis
+- **Cards:** Bordas sutis com shadow elegante
+- **Tipografia:** Inter ou similar (legível e moderna)
+- **Spacing:** Consistente usando sistema Tailwind
+- **Hover effects:** Transições suaves de 200-300ms
+
+## Fluxo de Navegação
+
+### 1. Usuário Não Logado
+```
+Landing Page → Login/Signup → Destinations Page
+```
+
+### 2. Usuário Logado
+```
+Destinations Page (página inicial) ⇄ Outras funcionalidades
+```
+
+### 3. Navegação
+- **Header fixo** com logo, navegação e botão de login/perfil
+- **Breadcrumbs** quando necessário
+- **Mobile menu** responsivo
+
+## Diretrizes de Implementação
+
+### UX/UI Priorities
+1. **Clareza visual** - Informações organizadas e fáceis de encontrar
+2. **Velocidade** - Carregamento rápido com cache inteligente
+3. **Responsividade** - Perfeito em mobile, tablet e desktop
+4. **Acessibilidade básica** - Contraste adequado, alt texts
+5. **Feedback visual** - Estados de hover, loading, erro
+
+### Desenvolvimento Eficiente
+1. **Use Shadcn/UI** para todos os componentes possíveis
+2. **Reutilize componentes** - Crie um design system interno
+3. **Implemente cache** desde o início
+4. **Teste responsividade** em diferentes tamanhos
+5. **Configure Supabase** antes de criar as páginas de auth
+
+### Performance
+- **Lazy loading** para imagens
+- **Code splitting** por páginas
+- **Compressão de imagens** automática
+- **Minificação** de CSS/JS
+- **Cache headers** apropriados
+
+## Critérios de Sucesso
+
+### Funcionalidade
+- [ ] **4 páginas funcionais** e navegáveis
+- [ ] **Autenticação Supabase** funcionando perfeitamente
+- [ ] **Dados reais** dos destinos carregando
+- [ ] **Cache funcionando** - sem chamadas desnecessárias
+- [ ] **Filtros e busca** operacionais
+
+### Design
+- [ ] **Tema escuro** consistente e elegante
+- [ ] **Shadcn/UI** implementado em todos os componentes
+- [ ] **Totalmente responsivo** em todos os devices
+- [ ] **Animações suaves** e profissionais
+- [ ] **Tipografia e spacing** consistentes
+
+### Performance
+- [ ] **Carregamento rápido** (< 3s primeira visita)
+- [ ] **Cache eficiente** (< 1s visitas subsequentes)
+- [ ] **Imagens otimizadas** e lazy loading
+- [ ] **Sem erros de console** ou warnings
+
+## Instruções de Execução
+
+### Fase 1: Setup e Configuração
+1. **Configure Supabase** projeto e authentication
+2. **Configure APIs** (OpenWeather, Unsplash, REST Countries)
+3. **Setup Shadcn/UI** com tema escuro personalizado
+4. **Crie estrutura** de pastas organizada
+
+### Fase 2: Implementação das Páginas
+1. **Landing Page** - Foque na primeira impressão
+2. **Auth Pages** - Integração Supabase completa
+3. **Destinations Page** - Coração da aplicação
+4. **Navegação e routing** - Fluxo completo
+
+### Fase 3: Polimento e Otimização
+1. **Implemente cache** inteligente
+2. **Teste responsividade** completa
+3. **Otimize performance** e carregamento
+4. **Ajustes finais** de UX/UI
+
+**IMPORTANTE:** Foque em criar uma experiência **profissional e moderna** que pareça um produto real, não um projeto de faculdade. Use todas as ferramentas disponíveis (Supabase, Shadcn/UI, APIs gratuitas) para minimizar o trabalho manual e maximizar a qualidade do resultado final.
+
+Quero que voce use Context7 MCP para pegar documentacao atualizada em bibliotecas que voce adicionar, use Tavily MCP para pesquisar sobre APIs, e use o Supabase MCP para criar um projeto para esse projeto, e fazer tudo necessario para o banco de dados e autenticacao.
