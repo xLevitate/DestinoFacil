@@ -78,10 +78,10 @@ export default function LandingPage() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
-                <Globe className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center">
+                <img src="/logo.svg" alt="DestinoFácil Logo" className="h-10 w-10" />
               </div>
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold tracking-tight text-blue-600">
                 DestinoFácil
               </span>
             </Link>
@@ -112,7 +112,7 @@ export default function LandingPage() {
             <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
               <Link href="/auth">Entrar</Link>
             </Button>
-            <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+            <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700">
               <Link href="/destinos">
                 <Search className="mr-2 h-4 w-4" />
                 Começar Agora
@@ -135,7 +135,7 @@ export default function LandingPage() {
             
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
               Descubra seu{' '}
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-blue-600">
                 próximo destino
               </span>{' '}
               dos sonhos
@@ -147,7 +147,7 @@ export default function LandingPage() {
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" asChild className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 h-12 px-8">
+              <Button size="lg" asChild className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 h-12 px-8">
                 <Link href="/destinos">
                   <Search className="mr-2 h-5 w-5" />
                   Explorar Destinos
@@ -189,7 +189,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Tudo que você precisa para{' '}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-blue-600">
                 planejar sua viagem
               </span>
             </h2>
@@ -211,9 +211,9 @@ export default function LandingPage() {
               </CardHeader>
             </Card>
 
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10">
+            <Card className="group relative overflow-hidden border-0 bg-blue-50 dark:bg-blue-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
               <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
                   <Filter className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-xl">Filtros Avançados</CardTitle>
@@ -223,9 +223,9 @@ export default function LandingPage() {
               </CardHeader>
             </Card>
 
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
+            <Card className="group relative overflow-hidden border-0 bg-blue-50 dark:bg-blue-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
               <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-violet-600 text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
                   <Heart className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-xl">Favoritos</CardTitle>
@@ -235,9 +235,9 @@ export default function LandingPage() {
               </CardHeader>
             </Card>
 
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10">
+            <Card className="group relative overflow-hidden border-0 bg-blue-50 dark:bg-blue-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
               <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
                   <Plane className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-xl">Busca de Voos</CardTitle>
@@ -247,9 +247,9 @@ export default function LandingPage() {
               </CardHeader>
             </Card>
 
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/10">
+            <Card className="group relative overflow-hidden border-0 bg-blue-50 dark:bg-blue-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
               <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-teal-600 to-cyan-600 text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
                   <Smartphone className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-xl">Responsivo</CardTitle>
@@ -259,9 +259,9 @@ export default function LandingPage() {
               </CardHeader>
             </Card>
 
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10">
+            <Card className="group relative overflow-hidden border-0 bg-blue-50 dark:bg-blue-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
               <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-pink-600 to-rose-600 text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
                   <Award className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-xl">Gratuito</CardTitle>
@@ -288,7 +288,7 @@ export default function LandingPage() {
           
           <div className="mx-auto mt-16 grid max-w-5xl gap-12 lg:grid-cols-3">
             <div className="relative text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-xl font-bold">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white text-xl font-bold">
                 1
               </div>
               <h3 className="mt-6 text-xl font-semibold">Busque seu Destino</h3>
@@ -298,7 +298,7 @@ export default function LandingPage() {
             </div>
             
             <div className="relative text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-600 to-emerald-600 text-white text-xl font-bold">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white text-xl font-bold">
                 2
               </div>
               <h3 className="mt-6 text-xl font-semibold">Explore Informações</h3>
@@ -308,7 +308,7 @@ export default function LandingPage() {
             </div>
             
             <div className="relative text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-violet-600 text-white text-xl font-bold">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white text-xl font-bold">
                 3
               </div>
               <h3 className="mt-6 text-xl font-semibold">Planeje sua Viagem</h3>
@@ -326,7 +326,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Destinos em{' '}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-blue-600">
                 Alta
               </span>
             </h2>
@@ -404,7 +404,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Final */}
-      <section className="py-20 sm:py-32 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white">
+      <section className="py-20 sm:py-32 bg-blue-600 text-white">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -431,8 +431,8 @@ export default function LandingPage() {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
-                  <Globe className="h-4 w-4" />
+                <div className="flex h-8 w-8 items-center justify-center">
+                  <img src="/logo.svg" alt="DestinoFácil Logo" className="h-8 w-8" />
                 </div>
                 <span className="font-bold">DestinoFácil</span>
               </div>

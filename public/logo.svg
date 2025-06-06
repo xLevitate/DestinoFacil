@@ -1,0 +1,24 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Location pin shape -->
+  <path d="M60 10 C 80 10, 90 25, 90 40 C 90 55, 60 85, 60 85 C 60 85, 30 55, 30 40 C 30 25, 40 10, 60 10 Z" 
+        fill="white" 
+        stroke="none"/>
+  
+  <!-- Airplane icon inside the pin -->
+  <g transform="translate(60, 40)">
+    <!-- Airplane body -->
+    <path d="M 0 -12 L 3 -8 L 12 -2 L 12 2 L 3 8 L 0 12 L -3 8 L -12 2 L -12 -2 L -3 -8 Z" 
+          fill="#2563eb" 
+          stroke="none"/>
+    
+    <!-- Airplane wings -->
+    <path d="M -8 -4 L -15 -8 L -12 -2 L -8 0 Z M 8 -4 L 15 -8 L 12 -2 L 8 0 Z" 
+          fill="#2563eb" 
+          stroke="none"/>
+    
+    <!-- Airplane tail -->
+    <path d="M 0 8 L -4 12 L 0 10 L 4 12 Z" 
+          fill="#2563eb" 
+          stroke="none"/>
+  </g>
+</svg> 

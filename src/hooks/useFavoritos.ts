@@ -42,7 +42,7 @@ export const useFavoritos = (userId?: string) => {
     } catch (error: any) {
       // Não registrar erros para requisições canceladas
       if (!signal.aborted) {
-        console.error('Erro ao carregar favoritos:', error);
+        console.error('Erro ao carregar favoritos:', error?.message || error || 'Erro desconhecido');
       }
     } finally {
       if (!signal.aborted) {

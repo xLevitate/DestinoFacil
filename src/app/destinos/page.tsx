@@ -281,11 +281,11 @@ export default function PaginaDestinos() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
-            <Globe className="h-5 w-5" />
+          <div className="flex h-10 w-10 items-center justify-center">
+            <img src="/logo.svg" alt="DestinoFácil Logo" className="h-10 w-10" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">DestinoFácil</h1>
+            <h1 className="text-xl font-bold tracking-tight text-blue-600">DestinoFácil</h1>
             <p className="text-xs text-muted-foreground">Explore o mundo</p>
           </div>
         </div>
@@ -324,7 +324,7 @@ export default function PaginaDestinos() {
         />
       </div>
       <div className="flex gap-2">
-        <Button onClick={handleBuscar} disabled={carregando} size="lg" className="h-12 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+        <Button onClick={handleBuscar} disabled={carregando} size="lg" className="h-12 px-6 bg-blue-600 hover:bg-blue-700">
           <Search className="h-4 w-4 mr-2" />
           Buscar
         </Button>
@@ -342,7 +342,7 @@ export default function PaginaDestinos() {
     
     return (
       <Card className="group overflow-hidden hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 flex flex-col border-0 bg-gradient-to-br from-background to-muted/20">
-        <div className="h-56 relative bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden">
+        <div className="h-56 relative bg-blue-600 flex items-center justify-center overflow-hidden">
           <MapPin className="h-20 w-20 text-white/60 group-hover:scale-110 transition-transform duration-300" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           
@@ -398,7 +398,7 @@ export default function PaginaDestinos() {
               {destino.pais}
             </Badge>
             {popularidade > 80 && (
-              <Badge className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+              <Badge className="text-xs bg-yellow-500 text-white">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 Popular
               </Badge>
@@ -408,7 +408,7 @@ export default function PaginaDestinos() {
         
         <CardContent className="pt-0">
           <Button 
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 group-hover:scale-[1.02]" 
+            className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-200 group-hover:scale-[1.02]" 
             onClick={() => abrirSkyscanner(destino.nome)}
             aria-label={`Ver voos para ${destino.nome}`}
           >
@@ -480,7 +480,7 @@ export default function PaginaDestinos() {
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold tracking-tight mb-4">
             Explore o{' '}
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-blue-600">
               Mundo
             </span>
           </h2>
