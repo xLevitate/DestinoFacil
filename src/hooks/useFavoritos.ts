@@ -1,117 +1,137 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Favorito, InfoDestino } from '@/tipos';
 
 export const useFavoritos = (userId?: string) => {
-  const [favoritos, setFavoritos] = useState<Favorito[]>([]);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [favoritoIds, setFavoritoIds] = useState<Set<string>>(new Set());
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Carregar favoritos do usuário
-  const carregarFavoritos = async () => {
-    if (!userId) return;
+  const carregarFavoritos = useCallback(async () => {
+    // Cancelar requisição anterior se existir
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    if (!userId) {
+      setFavoritoIds(new Set());
+      setCarregando(false);
+      return;
+    }
+
+    // Criar novo controller de abort para esta requisição
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     setCarregando(true);
-    setErro(null);
-
     try {
       const { data, error } = await supabase
         .from('favoritos')
-        .select('*')
+        .select('destino_id')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .abortSignal(signal);
+
+      // Verificar se a requisição foi cancelada
+      if (signal.aborted) return;
 
       if (error) throw error;
-      setFavoritos(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar favoritos:', error);
-      setErro('Erro ao carregar favoritos');
+      
+      setFavoritoIds(new Set(data?.map(f => f.destino_id) || []));
+
+    } catch (error: any) {
+      // Não registrar erros para requisições canceladas
+      if (!signal.aborted) {
+        console.error('Erro ao carregar favoritos:', error);
+      }
     } finally {
-      setCarregando(false);
+      if (!signal.aborted) {
+        setCarregando(false);
+      }
     }
-  };
-
-  // Verificar se um destino está favoritado
-  const isFavoritado = (destinoId: string | number): boolean => {
-    return favoritos.some(fav => fav.destino_id === destinoId.toString());
-  };
-
-  // Adicionar aos favoritos
-  const adicionarFavorito = async (destino: InfoDestino): Promise<boolean> => {
-    if (!userId) return false;
-
-    try {
-      const { error } = await supabase
-        .from('favoritos')
-        .insert({
-          user_id: userId,
-          destino_id: destino.id.toString(),
-          destino_nome: destino.nome,
-          destino_pais: destino.pais,
-          destino_regiao: destino.regiao,
-          destino_populacao: destino.populacao,
-          destino_latitude: destino.latitude,
-          destino_longitude: destino.longitude
-        });
-
-      if (error) throw error;
-
-      // Recarregar favoritos
-      await carregarFavoritos();
-      return true;
-    } catch (error) {
-      console.error('Erro ao adicionar favorito:', error);
-      setErro('Erro ao adicionar favorito');
-      return false;
-    }
-  };
-
-  // Remover dos favoritos
-  const removerFavorito = async (destinoId: string | number): Promise<boolean> => {
-    if (!userId) return false;
-
-    try {
-      const { error } = await supabase
-        .from('favoritos')
-        .delete()
-        .eq('user_id', userId)
-        .eq('destino_id', destinoId.toString());
-
-      if (error) throw error;
-
-      // Recarregar favoritos
-      await carregarFavoritos();
-      return true;
-    } catch (error) {
-      console.error('Erro ao remover favorito:', error);
-      setErro('Erro ao remover favorito');
-      return false;
-    }
-  };
-
-  // Alternar favorito
-  const alternarFavorito = async (destino: InfoDestino): Promise<boolean> => {
-    const jaFavoritado = isFavoritado(destino.id);
-    
-    if (jaFavoritado) {
-      return await removerFavorito(destino.id);
-    } else {
-      return await adicionarFavorito(destino);
-    }
-  };
+  }, [userId]);
 
   useEffect(() => {
     carregarFavoritos();
-  }, [userId]);
+    
+    // Função de limpeza
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [carregarFavoritos]);
+
+  // Verificar se um destino está favoritado
+  const isFavoritado = useCallback((destinoId: string | number): boolean => {
+    if (!destinoId) return false;
+    return favoritoIds.has(destinoId.toString());
+  }, [favoritoIds]);
+
+  // Alternar favorito
+  const alternarFavorito = useCallback(async (destino: InfoDestino): Promise<boolean> => {
+    if (!userId) {
+      console.error("Usuário não autenticado para favoritar.");
+      return false;
+    }
+
+    if (!destino?.id) {
+      console.error("Destino inválido.");
+      return false;
+    }
+
+    const jaFavoritado = isFavoritado(destino.id);
+    const destinoIdStr = destino.id.toString();
+
+    // Atualização otimista da UI
+    const novoSet = new Set(favoritoIds);
+    if (jaFavoritado) {
+      novoSet.delete(destinoIdStr);
+    } else {
+      novoSet.add(destinoIdStr);
+    }
+    setFavoritoIds(novoSet);
+
+    try {
+      if (jaFavoritado) {
+        // Remover
+        const { error } = await supabase
+          .from('favoritos')
+          .delete()
+          .eq('user_id', userId)
+          .eq('destino_id', destinoIdStr);
+        if (error) throw error;
+
+      } else {
+        // Adicionar - validar campos obrigatórios
+        const destinoData = {
+          user_id: userId,
+          destino_id: destinoIdStr,
+          destino_nome: (destino.nome || '').slice(0, 255),
+          destino_pais: (destino.pais || '').slice(0, 255),
+          destino_regiao: (destino.regiao || '').slice(0, 255),
+          destino_populacao: Math.max(0, destino.populacao || 0),
+          destino_latitude: Math.max(-90, Math.min(90, destino.latitude || 0)),
+          destino_longitude: Math.max(-180, Math.min(180, destino.longitude || 0))
+        };
+
+        const { error } = await supabase
+          .from('favoritos')
+          .insert(destinoData);
+        if (error) throw error;
+      }
+      return true;
+    } catch (error) {
+      console.error('Erro ao alternar favorito:', error);
+      // Reverter a UI em caso de erro
+      setFavoritoIds(favoritoIds); // Restaurar estado original
+      return false;
+    }
+  }, [userId, favoritoIds, isFavoritado]);
 
   return {
-    favoritos,
     carregando,
-    erro,
     isFavoritado,
-    adicionarFavorito,
-    removerFavorito,
     alternarFavorito,
-    recarregar: carregarFavoritos
   };
 }; 

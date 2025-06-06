@@ -1,16 +1,3 @@
-export interface ImagemCidade {
-  id: number;
-  url: string;
-  miniatura: string;
-  alt: string;
-  fotografo: {
-    nome: string;
-    perfil: string;
-  };
-}
-
-
-
 export interface InfoPais {
   nome: string;
   nomeOficial: string;
@@ -76,11 +63,12 @@ export interface InfoDestino {
   populacao: number;
   latitude: number;
   longitude: number;
-  imagens: ImagemCidade[];
   infoPais: InfoPais | null;
   preco: 'baixo' | 'medio' | 'alto';
   clima: 'frio' | 'temperado' | 'quente';
   isFavorito?: boolean;
+  continente: string;
+  atividades: string[];
 }
 
 export interface Favorito {
@@ -97,12 +85,15 @@ export interface Favorito {
   updated_at: string;
 }
 
+export type Atividade = 'praia' | 'cidade' | 'montanha' | 'neve' | 'deserto' | 'rural';
+
 export interface FiltrosDestino {
   regiao?: string;
-  populacaoMin?: number;
-  populacaoMax?: number;
   preco?: 'baixo' | 'medio' | 'alto';
   clima?: 'frio' | 'temperado' | 'quente';
+  atividades?: Atividade[];
+  populacaoMin?: number;
+  populacaoMax?: number;
   ordenarPor?: 'nome' | 'populacao' | 'popularidade';
 }
 
@@ -111,7 +102,6 @@ export interface ResultadoPaginado<T> {
   paginaAtual: number;
   totalPaginas: number;
   totalItens: number;
-  itensPorPagina: number;
 }
 
 export interface ParametrosPaginacao {

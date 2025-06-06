@@ -1,7 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, User } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://exemplo.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'exemplo-key'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+// Validar variáveis de ambiente obrigatórias na inicialização
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Variáveis de ambiente do Supabase são obrigatórias: NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY')
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -20,20 +25,43 @@ export interface PerfilUsuario {
   updated_at: string
 }
 
+// Funções auxiliares de validação
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email) && email.length <= 320 // Limite RFC 5321
+}
+
+const validatePassword = (password: string): boolean => {
+  return password.length >= 8 && password.length <= 128
+}
+
+const sanitizeInput = (input: string): string => {
+  return input.trim().slice(0, 255) // Limitar comprimento da entrada
+}
+
 // Funções de autenticação
 export const authService = {
   // Registrar novo usuário
   async registrar(email: string, senha: string, nome: string) {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      throw new Error('Configuração do Supabase não encontrada. Configure as variáveis de ambiente.')
+    // Validação de entrada
+    if (!validateEmail(email)) {
+      throw new Error('E-mail inválido')
+    }
+    if (!validatePassword(senha)) {
+      throw new Error('A senha deve ter entre 8 e 128 caracteres')
+    }
+    
+    const nomeSeguro = sanitizeInput(nome)
+    if (!nomeSeguro || nomeSeguro.length < 2) {
+      throw new Error('Nome deve ter pelo menos 2 caracteres')
     }
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.toLowerCase(),
       password: senha,
       options: {
         data: {
-          nome
+          nome: nomeSeguro
         }
       }
     })
@@ -44,12 +72,16 @@ export const authService = {
 
   // Fazer login
   async entrar(email: string, senha: string) {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      throw new Error('Configuração do Supabase não encontrada. Configure as variáveis de ambiente.')
+    // Validação de entrada
+    if (!validateEmail(email)) {
+      throw new Error('E-mail inválido')
+    }
+    if (!validatePassword(senha)) {
+      throw new Error('Senha inválida')
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.toLowerCase(),
       password: senha
     })
     
@@ -64,20 +96,37 @@ export const authService = {
   },
 
   // Obter usuário atual
-  async obterUsuario() {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
-    return user
+  async obterUsuario(): Promise<User | null> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.user ?? null;
+    } catch (error) {
+      console.error('Erro ao obter usuário:', error);
+      return null;
+    }
+  },
+
+  // Observar mudanças de autenticação
+  onAuthStateChange(callback: (user: User | null) => void) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      callback(session?.user ?? null);
+    });
+    return subscription;
   },
 
   // Resetar senha
   async resetarSenha(email: string) {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      throw new Error('Configuração do Supabase não encontrada. Configure as variáveis de ambiente.')
+    // Validação de entrada
+    if (!validateEmail(email)) {
+      throw new Error('E-mail inválido')
     }
 
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`
+    // Usar uma URL de redirecionamento segura e predefinida
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const redirectTo = `${baseUrl}/auth/reset-password`
+
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
+      redirectTo
     })
     
     if (error) throw error

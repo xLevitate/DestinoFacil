@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/componentes/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/componentes/ui/card';
+import { Badge } from '@/componentes/ui/badge';
 import { ToggleTema } from '@/componentes/ToggleTema';
-import { servicoDestinos } from '@/servicos/apiDestinos';
+import { servicoDestinos } from '../servicos/apiDestinos';
+import { InfoDestino } from '@/tipos';
 import { 
   MapPin, 
   Plane, 
@@ -15,31 +17,31 @@ import {
   ArrowRight,
   Search,
   Globe,
-  Heart
+  Heart,
+  Shield,
+  Zap,
+  Navigation,
+  Filter,
+  Smartphone,
+  Award,
+  TrendingUp
 } from 'lucide-react';
 
-interface DestinoPopular {
-  nome: string;
-  imagem: string;
-  descricao: string;
-}
-
 export default function LandingPage() {
-  const [destinosPopulares, setDestinosPopulares] = useState<DestinoPopular[]>([]);
+  const [destinosPopulares, setDestinosPopulares] = useState<InfoDestino[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     const carregarDestinos = async () => {
       try {
-        const nomes = await servicoDestinos.obterDestinosPopulares();
-        const destinos = nomes.slice(0, 4).map(nome => ({
-          nome,
-          imagem: `/images/${nome.toLowerCase().replace(/\s+/g, '-')}.jpg`,
-          descricao: `Descubra as maravilhas de ${nome} e planeje sua viagem dos sonhos.`
-        }));
-        setDestinosPopulares(destinos);
+        const resultado = await servicoDestinos.obterDestinosPaginados({
+          pagina: 1,
+          limite: 6,
+          filtros: { ordenarPor: 'popularidade' }
+        });
+        setDestinosPopulares(resultado.dados);
       } catch (error) {
-        console.error('Erro ao carregar destinos:', error);
+        console.error('Erro ao carregar destinos populares:', error);
       } finally {
         setCarregando(false);
       }
@@ -48,219 +50,427 @@ export default function LandingPage() {
     carregarDestinos();
   }, []);
 
+  const obterEmojiPreco = (preco: 'baixo' | 'medio' | 'alto'): string => {
+    switch (preco) {
+      case 'baixo': return '💰';
+      case 'medio': return '💰💰';
+      case 'alto': return '💰💰💰';
+      default: return '💰';
+    }
+  };
+
+  const calcularEstrelas = (destino: InfoDestino): number => {
+    // Sistema simples de popularidade baseado na população e região
+    let score = 0;
+    if (destino.populacao > 10000000) score = 5;
+    else if (destino.populacao > 5000000) score = 4;
+    else if (destino.populacao > 2000000) score = 3;
+    else if (destino.populacao > 1000000) score = 2;
+    else score = 1;
+    
+    return Math.min(5, score);
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <div className="mr-4 flex">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
-              <Globe className="h-6 w-6" />
-              <span className="font-bold">DestinoFácil</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      {/* Header Moderno */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+                <Globe className="h-5 w-5" />
+              </div>
+              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                DestinoFácil
+              </span>
             </Link>
           </div>
-          <div className="flex flex-1 items-center justify-end space-x-2">
-            <nav className="flex items-center space-x-6 text-sm font-medium">
-              <Link href="/destinos" className="transition-colors hover:text-foreground/80">
-                Destinos
+          
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link 
+              href="/destinos" 
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Explorar Destinos
+            </Link>
+            <Link 
+              href="#features" 
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Funcionalidades
+            </Link>
+            <Link 
+              href="#como-funciona" 
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Como Funciona
+            </Link>
+          </nav>
+
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+              <Link href="/auth">Entrar</Link>
+            </Button>
+            <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+              <Link href="/destinos">
+                <Search className="mr-2 h-4 w-4" />
+                Começar Agora
               </Link>
-              <Link href="/auth" className="transition-colors hover:text-foreground/80">
-                Entrar
-              </Link>
-            </nav>
+            </Button>
             <ToggleTema />
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="container space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
-        <div className="flex max-w-[980px] flex-col items-start gap-2">
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-            Descubra seu próximo{" "}
-            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              destino dos sonhos
-            </span>
-          </h1>
-          <p className="max-w-[700px] text-lg text-muted-foreground">
-            Explore destinos incríveis ao redor do mundo, veja informações detalhadas sobre clima, 
-            população e pontos turísticos, e encontre voos com facilidade.
-          </p>
-        </div>
-        <div className="flex gap-4">
-          <Button asChild size="lg">
-            <Link href="/destinos">
-              <Search className="mr-2 h-4 w-4" />
-              Explorar Destinos
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" asChild>
-            <Link href="/auth">
-              Começar Agora
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="container space-y-6 py-8 md:py-12 lg:py-24">
-        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
-            Por que escolher o DestinoFácil?
-          </h2>
-          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            Tudo que você precisa para planejar sua viagem perfeita em uma só plataforma.
-          </p>
-        </div>
-        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <MapPin className="h-8 w-8 text-primary" />
-              </div>
-              <CardTitle>Destinos Únicos</CardTitle>
-              <CardDescription>
-                Descubra cidades e destinos incríveis com informações detalhadas e atualizadas.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Camera className="h-8 w-8 text-primary" />
-              </div>
-              <CardTitle>Fotos Profissionais</CardTitle>
-              <CardDescription>
-                Veja imagens de alta qualidade de cada destino para inspirar sua próxima viagem.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Plane className="h-8 w-8 text-primary" />
-              </div>
-              <CardTitle>Busca de Voos</CardTitle>
-              <CardDescription>
-                Encontre e compare voos diretamente integrado ao Google Flights.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section className="container space-y-6 py-8 md:py-12 lg:py-24">
-        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
-            Como funciona
-          </h2>
-          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            Em apenas 3 passos simples, encontre e planeje sua viagem perfeita.
-          </p>
-        </div>
-        <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
-          <div className="flex flex-col items-center space-y-4 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Search className="h-8 w-8" />
-            </div>
-            <h3 className="text-xl font-bold">1. Busque</h3>
-            <p className="text-muted-foreground">
-              Digite o nome de uma cidade ou destino que você gostaria de visitar.
+      <section className="relative overflow-hidden py-20 sm:py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-600/5 to-purple-600/5" />
+        <div className="container mx-auto px-4 relative">
+          <div className="mx-auto max-w-4xl text-center">
+            <Badge variant="secondary" className="mb-8 px-4 py-2 text-sm">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Plataforma de Viagens
+            </Badge>
+            
+            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+              Descubra seu{' '}
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                próximo destino
+              </span>{' '}
+              dos sonhos
+            </h1>
+            
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
+              Explore destinos incríveis ao redor do mundo com informações detalhadas sobre clima, 
+              população e pontos turísticos. Encontre voos e planeje sua viagem perfeita.
             </p>
-          </div>
-          <div className="flex flex-col items-center space-y-4 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <MapPin className="h-8 w-8" />
+            
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button size="lg" asChild className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 h-12 px-8">
+                <Link href="/destinos">
+                  <Search className="mr-2 h-5 w-5" />
+                  Explorar Destinos
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto h-12 px-8">
+                <Link href="/auth">
+                  Criar Conta Gratuita
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
             </div>
-            <h3 className="text-xl font-bold">2. Explore</h3>
-            <p className="text-muted-foreground">
-              Veja informações detalhadas, fotos, clima e dados interessantes sobre o local.
-            </p>
-          </div>
-          <div className="flex flex-col items-center space-y-4 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Plane className="h-8 w-8" />
+            
+            <div className="mt-16 grid grid-cols-2 gap-8 sm:grid-cols-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-foreground">1000+</div>
+                <div className="text-sm text-muted-foreground">Destinos</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">195</div>
+                <div className="text-sm text-muted-foreground">Países</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">100%</div>
+                <div className="text-sm text-muted-foreground">Gratuito</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">24/7</div>
+                <div className="text-sm text-muted-foreground">Disponível</div>
+              </div>
             </div>
-            <h3 className="text-xl font-bold">3. Viaje</h3>
-            <p className="text-muted-foreground">
-              Encontre voos diretamente no Google Flights e comece a planejar sua viagem.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Popular Destinations Preview */}
-      <section className="container space-y-6 py-8 md:py-12 lg:py-24">
-        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
-            Destinos Populares
-          </h2>
-          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            Conheça alguns dos destinos mais procurados pelos viajantes.
-          </p>
-        </div>
-        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {carregando ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <div className="h-48 bg-muted rounded-t-lg" />
-                <CardHeader>
-                  <div className="h-4 bg-muted rounded w-3/4" />
-                  <div className="h-3 bg-muted rounded w-full" />
-                </CardHeader>
-              </Card>
-            ))
-          ) : (
-            destinosPopulares.map((destino) => (
-              <Card key={destino.nome} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="h-48 bg-gradient-to-b from-primary/20 to-primary/5 flex items-center justify-center">
-                  <MapPin className="h-12 w-12 text-primary/60" />
+      {/* Funcionalidades */}
+      <section id="features" className="py-20 sm:py-32 bg-background/50">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Tudo que você precisa para{' '}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                planejar sua viagem
+              </span>
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              Uma plataforma completa com todas as ferramentas necessárias para descobrir e planejar seu próximo destino.
+            </p>
+          </div>
+          
+          <div className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
+              <CardHeader>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+                  <Search className="h-6 w-6" />
                 </div>
-                <CardHeader>
-                  <CardTitle className="text-lg">{destino.nome}</CardTitle>
-                  <CardDescription>{destino.descricao}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))
-          )}
-        </div>
-        <div className="flex justify-center">
-          <Button asChild variant="outline" size="lg">
-            <Link href="/destinos">
-              Ver Todos os Destinos
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+                <CardTitle className="text-xl">Busca Inteligente</CardTitle>
+                <CardDescription>
+                  Encontre destinos por nome, região ou características específicas com nossa busca avançada.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10">
+              <CardHeader>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white">
+                  <Filter className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-xl">Filtros Avançados</CardTitle>
+                <CardDescription>
+                  Refine sua busca por preço, clima, população e região para encontrar o destino perfeito.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
+              <CardHeader>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-violet-600 text-white">
+                  <Heart className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-xl">Favoritos</CardTitle>
+                <CardDescription>
+                  Salve seus destinos preferidos e acesse-os facilmente em qualquer dispositivo.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10">
+              <CardHeader>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white">
+                  <Plane className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-xl">Busca de Voos</CardTitle>
+                <CardDescription>
+                  Integração direta com Skyscanner para encontrar as melhores ofertas de passagens.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/10">
+              <CardHeader>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-teal-600 to-cyan-600 text-white">
+                  <Smartphone className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-xl">Responsivo</CardTitle>
+                <CardDescription>
+                  Interface otimizada para desktop, tablet e celular. Acesse de qualquer lugar.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10">
+              <CardHeader>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-pink-600 to-rose-600 text-white">
+                  <Award className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-xl">Gratuito</CardTitle>
+                <CardDescription>
+                  Acesso completo a todas as funcionalidades sem custo. Projeto acadêmico sem fins lucrativos.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="border-t border-border/40">
-        <div className="container flex flex-col items-center justify-center gap-4 py-8 md:h-24 md:flex-row md:py-0">
-          <div className="flex flex-col items-center gap-2 md:flex-row">
-            <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-              Pronto para descobrir seu próximo destino?
+      {/* Como Funciona */}
+      <section id="como-funciona" className="py-20 sm:py-32">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Como funciona
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              Em apenas 3 passos simples, encontre e planeje sua viagem dos sonhos.
             </p>
           </div>
-          <Button asChild>
-            <Link href="/destinos">
-              Começar Agora
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          
+          <div className="mx-auto mt-16 grid max-w-5xl gap-12 lg:grid-cols-3">
+            <div className="relative text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-xl font-bold">
+                1
+              </div>
+              <h3 className="mt-6 text-xl font-semibold">Busque seu Destino</h3>
+              <p className="mt-4 text-muted-foreground">
+                Digite o nome de uma cidade, país ou região que você gostaria de visitar. Use nossos filtros para refinar sua busca.
+              </p>
+            </div>
+            
+            <div className="relative text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-600 to-emerald-600 text-white text-xl font-bold">
+                2
+              </div>
+              <h3 className="mt-6 text-xl font-semibold">Explore Informações</h3>
+              <p className="mt-4 text-muted-foreground">
+                Descubra informações detalhadas sobre clima, população, preços e características únicas de cada destino.
+              </p>
+            </div>
+            
+            <div className="relative text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-violet-600 text-white text-xl font-bold">
+                3
+              </div>
+              <h3 className="mt-6 text-xl font-semibold">Planeje sua Viagem</h3>
+              <p className="mt-4 text-muted-foreground">
+                Encontre voos com nossa integração ao Skyscanner e comece a planejar sua aventura perfeita.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Destinos Populares */}
+      <section className="py-20 sm:py-32 bg-background/50">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Destinos em{' '}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Alta
+              </span>
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              Conheça alguns dos destinos mais procurados e bem avaliados pelos viajantes.
+            </p>
+          </div>
+          
+          <div className="mx-auto mt-16 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {carregando ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="animate-pulse overflow-hidden">
+                  <div className="h-48 bg-muted" />
+                  <CardHeader>
+                    <div className="h-6 w-3/4 bg-muted rounded" />
+                    <div className="h-4 w-full bg-muted rounded" />
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              destinosPopulares.map((destino) => {
+                const estrelas = calcularEstrelas(destino);
+                return (
+                  <Card key={destino.id} className="group overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
+                    <Link href="/destinos">
+                      <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <MapPin className="h-16 w-16 text-white/80" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                        
+                        {/* Badges de Preço e Popularidade */}
+                        <div className="absolute top-3 left-3 flex flex-col gap-2">
+                          <Badge className="bg-white/20 text-white border-white/30 text-xs">
+                            {obterEmojiPreco(destino.preco)} {destino.preco}
+                          </Badge>
+                          <Badge className="bg-yellow-500/20 text-yellow-200 border-yellow-500/30 text-xs">
+                            <Star className="mr-1 h-3 w-3 fill-current" />
+                            {estrelas}
+                          </Badge>
+                        </div>
+
+                        <div className="absolute top-3 right-3">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/20 text-white hover:bg-white/30">
+                            <Heart className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <CardHeader className="space-y-2">
+                        <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+                          {destino.nome}
+                        </CardTitle>
+                        <CardDescription className="flex items-center justify-between">
+                          <span>{destino.regiao}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {(destino.populacao / 1000000).toFixed(1)}M hab
+                          </span>
+                        </CardDescription>
+                      </CardHeader>
+                    </Link>
+                  </Card>
+                );
+              })
+            )}
+          </div>
+          
+          <div className="mt-12 text-center">
+            <Button asChild size="lg" variant="outline" className="h-12 px-8">
+              <Link href="/destinos">
+                Ver Todos os Destinos
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Final */}
+      <section className="py-20 sm:py-32 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Pronto para descobrir o mundo?
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-blue-100">
+              Junte-se a milhares de viajantes que descobriram seus destinos dos sonhos conosco.
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button size="lg" variant="secondary" asChild className="w-full sm:w-auto h-12 px-8">
+                <Link href="/destinos">
+                  <Search className="mr-2 h-5 w-5" />
+                  Começar Exploração
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/40">
-        <div className="container flex flex-col items-center justify-between gap-4 py-10 md:h-24 md:flex-row md:py-0">
-          <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-            <Globe className="h-6 w-6" />
-            <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-              © 2024 DestinoFácil. Projeto Acadêmico.
-            </p>
+      <footer className="border-t border-border/40 bg-background/80">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+                  <Globe className="h-4 w-4" />
+                </div>
+                <span className="font-bold">DestinoFácil</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Plataforma para descoberta de destinos de viagem.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-medium">Plataforma</h3>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/destinos" className="hover:text-foreground transition-colors">Explorar Destinos</Link></li>
+                <li><Link href="/auth" className="hover:text-foreground transition-colors">Criar Conta</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-medium">Recursos</h3>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li><Link href="#features" className="hover:text-foreground transition-colors">Funcionalidades</Link></li>
+                <li><Link href="#como-funciona" className="hover:text-foreground transition-colors">Como Funciona</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-medium">Equipe</h3>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li>Aluisio Paredes</li>
+                <li>Enzo Gabriel</li>
+                <li>Guilherme Almeida</li>
+                <li>Pedro Cesar</li>
+                <li>Victor Santana</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mt-12 border-t border-border/40 pt-8 text-center text-sm text-muted-foreground">
+            © 2024 DestinoFácil. Projeto Acadêmico - Todos os direitos reservados.
           </div>
         </div>
       </footer>

@@ -1,258 +1,102 @@
 import { PaisLocal, CidadeLocal } from '../tipos';
 
-// Cache dos dados carregados
+// Cache para países (que são poucos)
 let paisesCache: PaisLocal[] | null = null;
-let cidadesCache: CidadeLocal[] | null = null;
+let cidadesCache: CidadeLocal[] | null = null; // O cache de cidades será removido para buscas dinâmicas
 
-// Carregamento assíncrono dos dados
-const carregarDados = async (): Promise<{ paises: PaisLocal[], cidades: CidadeLocal[] }> => {
-  if (!paisesCache || !cidadesCache) {
-    try {
-      const [paisesResponse, cidadesResponse] = await Promise.all([
-        fetch('/countries.json'),
-        fetch('/cities.json')
-      ]);
+const carregarPaises = async (): Promise<PaisLocal[]> => {
+  if (paisesCache) return paisesCache;
 
-      if (!paisesResponse.ok || !cidadesResponse.ok) {
-        throw new Error('Erro ao carregar dados locais');
-      }
-
-      paisesCache = await paisesResponse.json();
-      cidadesCache = await cidadesResponse.json();
-    } catch (error) {
-      console.error('Erro ao carregar dados locais:', error);
-      // Dados de fallback mínimos
-      paisesCache = [];
-      cidadesCache = [];
-    }
+  try {
+    const response = await fetch('/countries.json');
+    if (!response.ok) throw new Error('Erro ao carregar países.');
+    paisesCache = await response.json();
+    return paisesCache!;
+  } catch (error) {
+    console.error('Erro ao carregar countries.json:', error);
+    return [];
   }
+};
 
-  return { paises: paisesCache!, cidades: cidadesCache! };
+const carregarCidades = async (): Promise<CidadeLocal[]> => {
+    // Para buscas dinâmicas, não vamos mais cachear todas as cidades em memória
+    // O ideal seria um backend, mas vamos carregar sob demanda para a busca
+    if (cidadesCache) return cidadesCache;
+    try {
+        const response = await fetch('/cities.json');
+        if (!response.ok) throw new Error('Erro ao carregar cidades.');
+        cidadesCache = await response.json();
+        return cidadesCache!;
+    } catch (error) {
+        console.error('Erro ao carregar cities.json:', error);
+        return [];
+    }
 };
 
 export const servicoDadosLocais = {
-  // Buscar cidades por nome (busca exata e fuzzy)
   async buscarCidades(nome: string, limite: number = 10): Promise<CidadeLocal[]> {
-    const { cidades } = await carregarDados();
+    const cidades = await carregarCidades();
     const nomeLower = nome.toLowerCase();
-
-    // Busca exata primeiro
-    const exactMatch = cidades.filter(cidade => 
-      cidade.name.toLowerCase() === nomeLower
-    );
-
-    // Busca fuzzy como fallback
-    const fuzzyMatch = cidades.filter(cidade => 
-      cidade.name.toLowerCase().includes(nomeLower) && 
-      !exactMatch.some(exact => exact.id === cidade.id) // Evitar duplicatas
-    );
-
-    return [...exactMatch, ...fuzzyMatch].slice(0, limite);
+    
+    return cidades.filter(c => c.name.toLowerCase().includes(nomeLower)).slice(0, limite);
   },
 
-  // Buscar país por código ISO
   async buscarPaisPorCodigo(codigo: string): Promise<PaisLocal | null> {
-    const { paises } = await carregarDados();
-    return paises.find(pais => pais.iso2 === codigo || pais.iso3 === codigo) || null;
+    const paises = await carregarPaises();
+    return paises.find(p => p.iso2 === codigo || p.iso3 === codigo) || null;
   },
 
-  // Buscar país por ID
   async buscarPaisPorId(id: number): Promise<PaisLocal | null> {
-    const { paises } = await carregarDados();
-    return paises.find(pais => pais.id === id) || null;
+    const paises = await carregarPaises();
+    return paises.find(p => p.id === id) || null;
   },
 
-  // Buscar cidades por país
-  async buscarCidadesPorPais(codigoPais: string, limite: number = 50): Promise<CidadeLocal[]> {
-    const { cidades } = await carregarDados();
-    
-    const cidadesPais = cidades.filter(cidade => 
-      cidade.country_code === codigoPais.toUpperCase()
-    );
+  /**
+   * Busca destinos. Se um termo de busca for fornecido, filtra todas as cidades.
+   * Se nenhum termo for fornecido, retorna uma lista de cidades populares (capitais).
+   */
+  async buscarDestinos(termo?: string, limite: number = 100): Promise<CidadeLocal[]> {
+    const [cidades, paises] = await Promise.all([carregarCidades(), carregarPaises()]);
 
-    // Ordenar por nome
-    return cidadesPais
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(0, limite);
-  },
-
-  // Buscar cidades populares para destinos turísticos
-  async buscarDestinos(termo?: string, limite: number = 20): Promise<CidadeLocal[]> {
-    const { cidades, paises } = await carregarDados();
-    
-    // Lista melhorada de cidades turisticamente importantes
-    let cidadesDesejadas = cidades.filter(cidade => {
-      const pais = paises.find(p => p.id === cidade.country_id);
-      if (!pais) return false;
-      
-      // Incluir capitais importantes
-      if (pais.capital.toLowerCase() === cidade.name.toLowerCase()) {
-        return true;
-      }
-      
-      // Lista expandida de cidades importantes turisticamente
-      const cidadesImportantes = [
-        // Brasil
-        'rio de janeiro', 'são paulo', 'salvador', 'fortaleza', 'brasília', 'recife', 'belo horizonte', 'porto alegre', 'curitiba', 'manaus',
-        // Estados Unidos
-        'new york', 'los angeles', 'san francisco', 'las vegas', 'miami', 'chicago', 'boston', 'washington', 'seattle', 'philadelphia',
-        // França
-        'paris', 'marseille', 'nice', 'lyon', 'cannes', 'bordeaux', 'toulouse', 'strasbourg',
-        // Reino Unido
-        'london', 'manchester', 'edinburgh', 'liverpool', 'birmingham', 'glasgow', 'oxford', 'cambridge',
-        // Itália
-        'rome', 'milan', 'venice', 'florence', 'naples', 'turin', 'bologna', 'genoa', 'palermo',
-        // Espanha
-        'barcelona', 'madrid', 'seville', 'valencia', 'bilbao', 'granada', 'toledo', 'salamanca',
-        // Alemanha
-        'berlin', 'munich', 'hamburg', 'cologne', 'frankfurt', 'stuttgart', 'dresden', 'heidelberg',
-        // Países Baixos
-        'amsterdam', 'rotterdam', 'the hague', 'utrecht', 'eindhoven',
-        // Áustria
-        'vienna', 'salzburg', 'innsbruck', 'graz',
-        // República Tcheca
-        'prague', 'brno', 'ostrava',
-        // Japão
-        'tokyo', 'osaka', 'kyoto', 'hiroshima', 'nagoya', 'yokohama', 'kobe', 'fukuoka',
-        // Coreia do Sul
-        'seoul', 'busan', 'incheon', 'daegu',
-        // Tailândia
-        'bangkok', 'phuket', 'chiang mai', 'pattaya',
-        // Singapura
-        'singapore',
-        // Hong Kong
-        'hong kong',
-        // China
-        'beijing', 'shanghai', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'nanjing',
-        // Austrália
-        'sydney', 'melbourne', 'perth', 'brisbane', 'adelaide', 'canberra',
-        // Emirados Árabes Unidos
-        'dubai', 'abu dhabi', 'sharjah',
-        // Turquia
-        'istanbul', 'ankara', 'izmir', 'antalya',
-        // Rússia
-        'moscow', 'st petersburg', 'novosibirsk', 'yekaterinburg',
-        // Egito
-        'cairo', 'alexandria', 'luxor', 'aswan',
-        // Marrocos
-        'marrakech', 'casablanca', 'fez', 'rabat',
-        // África do Sul
-        'cape town', 'johannesburg', 'durban', 'pretoria',
-        // Argentina
-        'buenos aires', 'córdoba', 'rosario', 'mendoza',
-        // Chile
-        'santiago', 'valparaíso', 'concepción',
-        // Peru
-        'lima', 'cusco', 'arequipa',
-        // Índia
-        'mumbai', 'delhi', 'bangalore', 'goa', 'kolkata', 'chennai', 'hyderabad', 'pune',
-        // Portugal
-        'lisbon', 'porto', 'faro', 'coimbra',
-        // Grécia
-        'athens', 'thessaloniki', 'patras',
-        // Suíça
-        'zurich', 'geneva', 'basel', 'bern',
-        // Canadá
-        'toronto', 'vancouver', 'montreal', 'calgary', 'ottawa',
-        // México
-        'mexico city', 'guadalajara', 'monterrey', 'cancun', 'puerto vallarta'
-      ];
-      
-      return cidadesImportantes.includes(cidade.name.toLowerCase());
-    });
-
-    // Se há termo de busca, filtrar e expandir busca
     if (termo) {
       const termoLower = termo.toLowerCase().trim();
-      
-      // Busca expandida: nome da cidade, país, e busca parcial
-      const cidadesBusca = cidades.filter(cidade =>
-        cidade.name.toLowerCase().includes(termoLower) ||
-        cidade.country_name.toLowerCase().includes(termoLower) ||
-        cidade.state_name?.toLowerCase().includes(termoLower)
-      );
+      if (!termoLower) return this.obterCidadesPopulares(cidades, paises, limite);
 
-      // Combinar resultados: cidades importantes + resultados da busca
-      const cidadesCombinadas = [...cidadesDesejadas, ...cidadesBusca];
-      
-      // Remover duplicatas usando um Set com o ID da cidade
-      const cidadesUnicas = cidadesCombinadas.filter((cidade, index, array) => 
-        array.findIndex(c => c.id === cidade.id) === index
+      // Busca em toda a base de cidades
+      const resultados = cidades.filter(c =>
+        c.name.toLowerCase().includes(termoLower) ||
+        c.country_name.toLowerCase().includes(termoLower) ||
+        c.state_name?.toLowerCase().includes(termoLower)
       );
-
-      cidadesDesejadas = cidadesUnicas;
+      return resultados.slice(0, limite);
     }
 
-    // NOVA LÓGICA: Remover duplicatas de nomes de cidades, priorizando as mais importantes
-    const cidadesPriorizadas = new Map<string, CidadeLocal>();
+    // Retorna cidades populares se não houver busca
+    return this.obterCidadesPopulares(cidades, paises, limite);
+  },
+
+  /**
+   * Retorna uma lista de cidades populares (capitais e cidades com alta população).
+   */
+  obterCidadesPopulares(cidades: CidadeLocal[], paises: PaisLocal[], limite: number): CidadeLocal[] {
+    const capitais = new Set(paises.map(p => p.capital.toLowerCase()));
     
-    // Definir prioridades por país para cidades com nomes duplicados
-    const prioridadesPaises: { [key: string]: number } = {
-      'Egypt': 10,        // Alexandria, Egypt é a mais famosa
-      'United States': 9, // Cidades americanas são conhecidas
-      'United Kingdom': 8,
-      'France': 8,
-      'Italy': 8,
-      'Spain': 7,
-      'Germany': 7,
-      'Japan': 8,
-      'China': 7,
-      'Brazil': 6,
-      'Australia': 5,
-      'Canada': 4,
-      'Mexico': 5
-    };
-
-    cidadesDesejadas.forEach(cidade => {
-      const nomeLower = cidade.name.toLowerCase();
-      const prioridadePais = prioridadesPaises[cidade.country_name] || 1;
-      
-      // Se já temos uma cidade com esse nome, comparar prioridades
-      if (cidadesPriorizadas.has(nomeLower)) {
-        const cidadeExistente = cidadesPriorizadas.get(nomeLower)!;
-        const prioridadeExistente = prioridadesPaises[cidadeExistente.country_name] || 1;
-        
-        // Só substituir se a nova cidade tem prioridade maior
-        if (prioridadePais > prioridadeExistente) {
-          cidadesPriorizadas.set(nomeLower, cidade);
-        }
-      } else {
-        // Primeira cidade com esse nome
-        cidadesPriorizadas.set(nomeLower, cidade);
-      }
-    });
-
-    // Converter de volta para array
-    const cidadesFinais = Array.from(cidadesPriorizadas.values());
-
-    // Ordenar por relevância: capitais primeiro, depois por população estimada, depois alfabeticamente
-    return cidadesFinais
+    return cidades
+      .filter(c => capitais.has(c.name.toLowerCase()))
       .sort((a, b) => {
-        // Verificar se é capital
-        const paisA = paises.find(p => p.id === a.country_id);
-        const paisB = paises.find(p => p.id === b.country_id);
-        
-        const isCapitalA = paisA?.capital.toLowerCase() === a.name.toLowerCase();
-        const isCapitalB = paisB?.capital.toLowerCase() === b.name.toLowerCase();
-        
-        if (isCapitalA && !isCapitalB) return -1;
-        if (!isCapitalA && isCapitalB) return 1;
-        
-        // Depois por prioridade do país
-        const prioridadeA = prioridadesPaises[a.country_name] || 1;
-        const prioridadeB = prioridadesPaises[b.country_name] || 1;
-        
-        if (prioridadeA !== prioridadeB) return prioridadeB - prioridadeA;
-        
-        // Por último, ordenar alfabeticamente
-        return a.name.localeCompare(b.name);
+          // Um critério de popularidade simples: capitais de países maiores primeiro
+          const paisA = paises.find(p => p.id === a.country_id);
+          const paisB = paises.find(p => p.id === b.country_id);
+          // Este dado de população não existe no JSON, é um exemplo.
+          // O ideal seria ter a população no JSON de países.
+          // Por enquanto, vamos ordenar pelo nome.
+          return a.name.localeCompare(b.name);
       })
       .slice(0, limite);
   },
 
-  // Limpar cache (útil para debugging)
   limparCache() {
     paisesCache = null;
     cidadesCache = null;
-  }
+  },
 }; 

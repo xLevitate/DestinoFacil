@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/componentes/ui/card'
 import { ToggleTema } from '@/componentes/ToggleTema';
 import { authService } from '@/lib/supabase';
 import { useFavoritos } from '@/hooks/useFavoritos';
-import { obterUrlGoogleFlights } from '@/servicos/apiDestinos';
+
 import { formatarPopulacao } from '@/lib/utils';
 import { 
   Globe, 
@@ -30,8 +30,10 @@ export default function PaginaPerfil() {
   const [carregandoUsuario, setCarregandoUsuario] = useState(true);
   const router = useRouter();
 
-  // Hook de favoritos
-  const { favoritos, carregando: carregandoFavoritos, erro, recarregar } = useFavoritos(usuario?.id);
+  // Hook de favoritos  
+  const [favoritos, setFavoritos] = useState<any[]>([]);
+  const [carregandoFavoritos, setCarregandoFavoritos] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
 
   // Carregar usuário autenticado
   useEffect(() => {
@@ -63,8 +65,8 @@ export default function PaginaPerfil() {
     }
   };
 
-  const abrirGoogleFlights = (nomeDestino: string) => {
-    const url = obterUrlGoogleFlights('São Paulo', nomeDestino);
+  const abrirSkyscanner = (nomeDestino: string) => {
+    const url = `https://www.skyscanner.com.br/transporte/voos/sao-paulo/${encodeURIComponent(nomeDestino.toLowerCase().replace(/\s+/g, '-'))}/`;
     window.open(url, '_blank');
   };
 
@@ -161,7 +163,7 @@ export default function PaginaPerfil() {
                 {favoritos.length} {favoritos.length === 1 ? 'destino favoritado' : 'destinos favoritados'}
               </p>
             </div>
-            <Button variant="outline" onClick={recarregar} disabled={carregandoFavoritos}>
+            <Button variant="outline" disabled={carregandoFavoritos}>
               {carregandoFavoritos ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -237,7 +239,7 @@ export default function PaginaPerfil() {
 
                     {/* Botão de voos */}
                     <Button 
-                      onClick={() => abrirGoogleFlights(favorito.destino_nome)}
+                      onClick={() => abrirSkyscanner(favorito.destino_nome)}
                       className="w-full"
                       variant="outline"
                     >

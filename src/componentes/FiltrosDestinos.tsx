@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/componentes/ui/button';
 import { Input } from '@/componentes/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/componentes/ui/card';
@@ -18,31 +18,34 @@ interface FiltrosDestinosProps {
   filtros: FiltrosDestino;
   onFiltrosChange: (filtros: FiltrosDestino) => void;
   onLimpar: () => void;
-  aberto: boolean;
-  onToggle: () => void;
 }
 
 export default function FiltrosDestinos({ 
   filtros, 
   onFiltrosChange, 
-  onLimpar, 
-  aberto, 
-  onToggle 
+  onLimpar,
 }: FiltrosDestinosProps) {
   const [filtrosLocais, setFiltrosLocais] = useState<FiltrosDestino>(filtros);
+
+  // Sincronizar o estado local quando os filtros do pai mudarem (ex: ao limpar)
+  useEffect(() => {
+    setFiltrosLocais(filtros);
+  }, [filtros]);
 
   const aplicarFiltros = () => {
     onFiltrosChange(filtrosLocais);
   };
 
   const limparFiltros = () => {
-    const filtrosVazios: FiltrosDestino = {};
-    setFiltrosLocais(filtrosVazios);
     onLimpar();
   };
 
   const atualizarFiltro = (campo: keyof FiltrosDestino, valor: any) => {
     const novosFiltros = { ...filtrosLocais, [campo]: valor };
+    // Remover o campo se for "all" ou vazio
+    if (valor === 'all' || valor === '' || valor === undefined || valor === null) {
+      delete novosFiltros[campo];
+    }
     setFiltrosLocais(novosFiltros);
   };
 
@@ -52,73 +55,78 @@ export default function FiltrosDestinos({
     return numero.toLocaleString('pt-BR');
   };
 
-  const parsePopulacao = (valor: string): number => {
-    return parseInt(valor.replace(/\D/g, '')) || 0;
+  const parsePopulacao = (valor: string): number | undefined => {
+    const parsed = parseInt(valor.replace(/\D/g, ''));
+    return isNaN(parsed) ? undefined : parsed;
   };
-
-  if (!aberto) {
-    return (
-      <Button
-        variant="outline"
-        onClick={onToggle}
-        className="flex items-center gap-2"
-      >
-        <Filter className="h-4 w-4" />
-        Filtros
-      </Button>
-    );
-  }
-
+  
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+    <Card className="w-full border-dashed">
+      <CardHeader>
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Filter className="h-5 w-5" />
-          Filtros
+          Opções de Filtro
         </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onToggle}>
-          <X className="h-4 w-4" />
-        </Button>
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Filtros de Preço e Clima */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Ordenação */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <ArrowUpDown className="h-4 w-4" />
+              Ordenar por
+            </label>
+            <Select
+              value={filtrosLocais.ordenarPor || 'popularidade'}
+              onValueChange={(value: string) => atualizarFiltro('ordenarPor', value as 'nome' | 'populacao' | 'popularidade')}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="popularidade">🔥 Popularidade</SelectItem>
+                <SelectItem value="nome">🔤 Nome</SelectItem>
+                <SelectItem value="populacao">👥 População</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Faixa de Preço */}
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Faixa de Preço
             </label>
             <Select
-              value={filtrosLocais.preco || ''}
-              onValueChange={(value: string) => atualizarFiltro('preco', value || undefined)}
+              value={filtrosLocais.preco || 'all'}
+              onValueChange={(value: string) => atualizarFiltro('preco', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Qualquer preço" />
+                <SelectValue placeholder="Qualquer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Qualquer preço</SelectItem>
+                <SelectItem value="all">Qualquer</SelectItem>
                 <SelectItem value="baixo">💰 Baixo</SelectItem>
                 <SelectItem value="medio">💰💰 Médio</SelectItem>
                 <SelectItem value="alto">💰💰💰 Alto</SelectItem>
               </SelectContent>
             </Select>
           </div>
-
+          {/* Clima */}
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <Thermometer className="h-4 w-4" />
               Clima
             </label>
             <Select
-              value={filtrosLocais.clima || ''}
-              onValueChange={(value: string) => atualizarFiltro('clima', value || undefined)}
+              value={filtrosLocais.clima || 'all'}
+              onValueChange={(value: string) => atualizarFiltro('clima', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Qualquer clima" />
+                <SelectValue placeholder="Qualquer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Qualquer clima</SelectItem>
+                <SelectItem value="all">Qualquer</SelectItem>
                 <SelectItem value="frio">🌨️ Frio</SelectItem>
                 <SelectItem value="temperado">🌤️ Temperado</SelectItem>
                 <SelectItem value="quente">☀️ Quente</SelectItem>
@@ -131,10 +139,10 @@ export default function FiltrosDestinos({
         <div className="space-y-2">
           <label className="text-sm font-medium flex items-center gap-2">
             <MapPin className="h-4 w-4" />
-            Região
+            Continente ou Região
           </label>
           <Input
-            placeholder="Ex: Europa, Ásia, América..."
+            placeholder="Ex: Europa, Ásia, América do Sul..."
             value={filtrosLocais.regiao || ''}
             onChange={(e) => atualizarFiltro('regiao', e.target.value || undefined)}
           />
@@ -152,8 +160,7 @@ export default function FiltrosDestinos({
                 placeholder="Mínimo"
                 value={filtrosLocais.populacaoMin ? formatarPopulacao(filtrosLocais.populacaoMin.toString()) : ''}
                 onChange={(e) => {
-                  const valor = parsePopulacao(e.target.value);
-                  atualizarFiltro('populacaoMin', valor || undefined);
+                  atualizarFiltro('populacaoMin', parsePopulacao(e.target.value));
                 }}
               />
             </div>
@@ -162,49 +169,27 @@ export default function FiltrosDestinos({
                 placeholder="Máximo"
                 value={filtrosLocais.populacaoMax ? formatarPopulacao(filtrosLocais.populacaoMax.toString()) : ''}
                 onChange={(e) => {
-                  const valor = parsePopulacao(e.target.value);
-                  atualizarFiltro('populacaoMax', valor || undefined);
+                  atualizarFiltro('populacaoMax', parsePopulacao(e.target.value));
                 }}
               />
             </div>
           </div>
         </div>
-
-        {/* Ordenação */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4" />
-            Ordenar por
-          </label>
-          <Select
-            value={filtrosLocais.ordenarPor || 'popularidade'}
-            onValueChange={(value: string) => atualizarFiltro('ordenarPor', value as 'nome' | 'populacao' | 'popularidade')}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="popularidade">🔥 Popularidade</SelectItem>
-              <SelectItem value="nome">🔤 Nome</SelectItem>
-              <SelectItem value="populacao">👥 População</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
+        
         {/* Botões de Ação */}
-        <div className="flex gap-2 pt-4">
+        <div className="flex flex-col sm:flex-row gap-2 pt-4">
+          <Button 
+            onClick={limparFiltros}
+            variant="outline"
+            className="flex-1"
+          >
+            Limpar Filtros
+          </Button>
           <Button 
             onClick={aplicarFiltros}
             className="flex-1"
           >
             Aplicar Filtros
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={limparFiltros}
-            className="flex-1"
-          >
-            Limpar
           </Button>
         </div>
       </CardContent>

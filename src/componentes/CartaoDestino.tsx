@@ -1,7 +1,7 @@
 'use client';
 import { InfoDestino } from '../tipos';
 import { FiMapPin, FiUsers, FiExternalLink } from 'react-icons/fi';
-import { obterUrlGoogleFlights } from '../servicos/apiDestinos';
+
 
 interface CartaoDestinoProps {
   destino: InfoDestino;
@@ -18,28 +18,17 @@ export default function CartaoDestino({ destino, cidadeOrigem = 'São Paulo' }: 
     return `${populacao} habitantes`;
   };
 
-  const abrirGoogleFlights = () => {
-    const url = obterUrlGoogleFlights(cidadeOrigem, destino.nome);
+  const abrirSkyscanner = () => {
+    const url = `https://www.skyscanner.com.br/transporte/voos/${encodeURIComponent(cidadeOrigem.toLowerCase().replace(/\s+/g, '-'))}/${encodeURIComponent(destino.nome.toLowerCase().replace(/\s+/g, '-'))}/`;
     window.open(url, '_blank');
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-      {/* Galeria de Imagens */}
-      {destino.imagens.length > 0 && (
-        <div className="relative h-64 overflow-hidden">
-          <div className="flex animate-scroll">
-            {destino.imagens.map((imagem, index) => (
-              <img
-                key={imagem.id}
-                src={imagem.url}
-                alt={imagem.alt}
-                className="w-full h-64 object-cover flex-shrink-0"
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Header com ícone */}
+      <div className="h-32 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+        <FiMapPin className="h-12 w-12 text-white/80" />
+      </div>
 
       {/* Informações */}
       <div className="p-6">
@@ -57,13 +46,13 @@ export default function CartaoDestino({ destino, cidadeOrigem = 'São Paulo' }: 
           </div>
         </div>
 
-        {/* Botão para Google Flights */}
+        {/* Botão para Skyscanner */}
         <button
-          onClick={abrirGoogleFlights}
+          onClick={abrirSkyscanner}
           className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
         >
           <FiExternalLink />
-          Ver voos no Google Flights
+          Ver voos no Skyscanner
         </button>
       </div>
     </div>
