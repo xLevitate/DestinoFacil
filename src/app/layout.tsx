@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ProvedorTema } from '@/context/ProvedorTema';
@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   description: 'Descubra destinos incríveis ao redor do mundo e encontre voos com facilidade',
   keywords: ['viagem', 'destinos', 'voos', 'turismo', 'férias'],
   authors: [{ name: 'Equipe DestinoFácil' }],
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function LayoutRaiz({
